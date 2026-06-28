@@ -31,11 +31,12 @@ Most attendance apps want a login, a server, and your data. Entrix is the opposi
 
 ## Screenshots
 
-> _To be added._ (`docs/screenshots/`)
+Material 3 UI with full light & dark theme support (and Material You dynamic color).
 
-| Dashboard | Office setup | History | Settings |
-|---|---|---|---|
-| _tbd_ | _tbd_ | _tbd_ | _tbd_ |
+| Dashboard | History | Settings |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/dashboard-light.jpg" width="230" alt="Dashboard (light)"> | <img src="docs/screenshots/history-light.jpg" width="230" alt="History (light)"> | <img src="docs/screenshots/settings-light.jpg" width="230" alt="Settings (light)"> |
+| <img src="docs/screenshots/dashboard-dark.jpg" width="230" alt="Dashboard (dark)"> | <img src="docs/screenshots/history-dark.jpg" width="230" alt="History (dark)"> | <img src="docs/screenshots/settings-dark.jpg" width="230" alt="Settings (dark)"> |
 
 ---
 
