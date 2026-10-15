@@ -66,6 +66,7 @@ class AutomaticCsvExporter(
             preferences.unlinkCsv()
             scheduler.cancel()
             previous?.let { releaseGrant(Uri.parse(it)) }
+            Unit
         }
     }
 
@@ -128,7 +129,7 @@ class AutomaticCsvExporter(
                 val line = StringBuilder()
                 while (line.length <= AttendanceCsv.HEADER.length + 2) {
                     val next = reader.read()
-                    if (next == -1 || next == '\n' || next == '\r') break
+                    if (next == -1 || next == '\n'.code || next == '\r'.code) break
                     line.append(next.toChar())
                 }
                 line.toString().removePrefix("\uFEFF")
