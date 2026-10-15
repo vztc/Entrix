@@ -72,6 +72,10 @@ fun SettingsScreen(
         ActivityResultContracts.RequestPermission(),
     ) { refreshKey++ }
 
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { refreshKey++ }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -104,14 +108,24 @@ fun SettingsScreen(
             PermissionRow(
                 title = "Location",
                 granted = fineGranted,
-                onGrant = { permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
+                onGrant = {
+                    locationPermissionLauncher.launch(
+                        arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION),
+                    )
+                },
             )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 HorizontalDivider()
                 PermissionRow(
                     title = "Background location",
                     granted = backgroundGranted,
-                    onGrant = { permissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION) },
+                    onGrant = {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            context.openAppSettings()
+                        } else {
+                            permissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                        }
+                    },
                 )
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -205,6 +219,15 @@ private fun Context.openBatterySettings() {
     runCatching {
         startActivity(
             Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+    }
+}
+
+private fun Context.openAppSettings() {
+    runCatching {
+        startActivity(
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
         )
     }

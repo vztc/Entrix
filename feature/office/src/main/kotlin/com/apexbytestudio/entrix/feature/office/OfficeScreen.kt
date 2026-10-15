@@ -51,9 +51,13 @@ fun OfficeScreen(
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { granted ->
-        if (granted) viewModel.useCurrentLocation() else viewModel.onLocationPermissionDenied()
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { permissions ->
+        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
+            viewModel.useCurrentLocation()
+        } else {
+            viewModel.onLocationPermissionDenied()
+        }
     }
 
     fun requestCurrentLocation() {
@@ -62,7 +66,9 @@ fun OfficeScreen(
             Manifest.permission.ACCESS_FINE_LOCATION,
         ) == PackageManager.PERMISSION_GRANTED
         if (granted) viewModel.useCurrentLocation()
-        else permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        else permissionLauncher.launch(
+            arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION),
+        )
     }
 
     Column(
