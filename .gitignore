@@ -15,3 +15,5 @@ build/
 .externalNativeBuild
 .cxx
 local.properties
+# Installation-specific location presets must never be published.
+app/src/main/assets/office-default.json

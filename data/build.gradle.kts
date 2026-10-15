@@ -15,6 +15,8 @@ dependencies {
     implementation(project(":core:location"))
 
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.room.ktx)
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.android)
 

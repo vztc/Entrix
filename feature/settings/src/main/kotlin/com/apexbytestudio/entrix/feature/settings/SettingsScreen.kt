@@ -1,6 +1,7 @@
 package com.apexbytestudio.entrix.feature.settings
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -28,6 +29,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.apexbytestudio.entrix.domain.export.AttendanceCsv
+import com.apexbytestudio.entrix.core.designsystem.component.EntrixOutlinedButton
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -50,6 +56,26 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val trackingEnabled by viewModel.trackingEnabled.collectAsStateWithLifecycle()
+    val csvStatus by viewModel.csvStatus.collectAsStateWithLifecycle()
+    val csvBusy by viewModel.csvBusy.collectAsStateWithLifecycle()
+    val csvMessage by viewModel.csvMessage.collectAsStateWithLifecycle()
+
+    val csvPicker = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { viewModel.linkCsv(it.toString()) }
+        }
+    }
+
+    fun chooseCsv(create: Boolean) {
+        csvPicker.launch(
+            Intent(if (create) Intent.ACTION_CREATE_DOCUMENT else Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = if (create) "text/csv" else "*/*"
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                if (create) putExtra(Intent.EXTRA_TITLE, AttendanceCsv.FILE_NAME)
+            },
+        )
+    }
 
     // Bumped on resume and after permission results to recompute system-owned statuses.
     var refreshKey by remember { mutableIntStateOf(0) }
@@ -146,6 +172,49 @@ fun SettingsScreen(
                     }
                 },
             )
+        }
+
+        EntrixCard {
+            Text("Automatic CSV export", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "One-time setup: choose one CSV. Entrix then updates it automatically after arrival, departure or history changes. Times use Europe/Amsterdam.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                "For OneDrive, connect your account in RSAF first. Then choose that connection in the file picker. Allow RSAF notifications and unrestricted battery use so it can upload in the background.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            TextButton(onClick = { context.openUrl("https://github.com/chenxiaolong/RSAF/releases/latest") }) {
+                Text("Get RSAF for OneDrive")
+            }
+            if (csvStatus.isLinked) {
+                Text(csvStatus.fileName.orEmpty(), fontWeight = FontWeight.Medium)
+                Text(
+                    if (csvStatus.isPending) "Waiting for file update…" else "Automatic file updates enabled",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                csvStatus.lastWrittenMillis?.let { millis ->
+                    val formatted = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
+                        .withZone(ZoneId.of("Europe/Amsterdam")).format(Instant.ofEpochMilli(millis))
+                    Text("Last file write: $formatted", style = MaterialTheme.typography.bodySmall)
+                }
+                Text(
+                    "The storage provider handles the cloud upload. Check the first update in OneDrive on another device. Keep this file for Entrix; use a copy for manual edits.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                TextButton(onClick = viewModel::disconnectCsv, enabled = !csvBusy) { Text("Disconnect CSV") }
+            }
+            (csvMessage ?: csvStatus.error)?.let {
+                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+            }
+            EntrixOutlinedButton(
+                text = if (csvBusy) "Linking…" else "Create linked CSV",
+                onClick = { chooseCsv(create = true) },
+                enabled = !csvBusy,
+            )
+            TextButton(onClick = { chooseCsv(create = false) }, enabled = !csvBusy) {
+                Text("Link existing Entrix CSV")
+            }
         }
 
         EntrixCard {

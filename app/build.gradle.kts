@@ -7,18 +7,13 @@ android {
 
     defaultConfig {
         applicationId = "com.apexbytestudio.entrix"
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
-        release {
-            // Personal sideload build: keep debug tooling out of the installed APK.
-            signingConfig = signingConfigs.getByName("debug")
-        }
-    }
+    // Release APKs are signed outside CI with the private personal update key.
 }
 
 dependencies {

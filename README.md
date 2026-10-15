@@ -177,3 +177,36 @@ No API keys or `local.properties` secrets are required to build or run.
 ## License
 
 MIT — see `LICENSE`. (Add a `LICENSE` file if one isn't present yet.)
+# Personal Android build
+
+This fork supports an optional private office preset on a fresh installation.
+The preset is packaged separately in the personal APK, outside the public source
+and CI artifact. Later office edits are preserved.
+
+Automatic CSV export is configured once under **Settings > Automatic CSV export**.
+For OneDrive, install [RSAF](https://github.com/chenxiaolong/RSAF), connect the
+desired OneDrive account there, then choose **Create linked CSV** in Entrix and
+save `Entrix-uren.csv` in that OneDrive connection. Existing empty CSV files or
+previous Entrix exports can also be linked. Allow background operation for both
+apps. The native OneDrive document provider may not keep persistent write access.
+
+Entrix writes a complete CSV snapshot after attendance/office/history changes.
+Persistent background jobs retry failed writes; a periodic reconciliation also
+checks for missed changes. Android can defer background execution. Files are
+passed to the chosen provider, which performs the cloud upload independently.
+The UI's last-write time is not a confirmation from the OneDrive server. Verify
+the first upload from another device. Keep the export as an Entrix-managed file;
+use a separate copy for editing in Excel. Deleting local history also removes it
+from the next CSV snapshot.
+
+CSV format: UTF-8 with BOM, semicolon delimiters, decimal commas, Amsterdam
+timestamps, stable registration IDs, and final durations calculated from UTC
+instants. Open visits have an empty end/duration and the status `Bezig`.
+The local database remains the source of truth. Cloud backup is disabled, and
+Entrix itself has no internet permission; the selected document provider handles
+the explicitly configured export.
+
+CI checks tests/lint and builds an **unsigned** release artifact. The personal
+installable APK is signed separately with a private update key that is never
+committed or uploaded as a public CI artifact. This version needs a fresh install
+over the earlier debug-key-signed personal prototype.

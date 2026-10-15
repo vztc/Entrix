@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AttendanceDao {
+    @Query("SELECT * FROM attendance ORDER BY enterTime ASC, id ASC")
+    suspend fun getHistory(): List<AttendanceEntity>
+
     @Query("SELECT * FROM attendance ORDER BY enterTime DESC")
     fun observeHistory(): Flow<List<AttendanceEntity>>
 

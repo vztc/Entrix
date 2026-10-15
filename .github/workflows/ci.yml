@@ -63,9 +63,9 @@ jobs:
           path: '**/build/reports/lint-results-*.html'
           if-no-files-found: ignore
 
-      - name: Upload installable APK
+      - name: Upload unsigned release APK for private signing
         uses: actions/upload-artifact@v4
         with:
-          name: Entrix-phone
+          name: Entrix-unsigned
           path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
